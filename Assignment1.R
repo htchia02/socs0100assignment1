@@ -9,6 +9,7 @@ pacman::p_load(
   flextable, #table
   glue, #combining strings and objects
   ggplot2,
+  purrr,
   skimr) #data visualisation
 
 #import data
@@ -70,5 +71,23 @@ data <- data %>%
 data %>%
   select(date,total_deaths,total_cases,cfr)
 
-# Function
+# Function to list countries above a specified case fatality rate
+countries_cfr_above_threshold <- function(data, cfr_threshold) {
+  data %>%
+    group_by(location)%>%
+    filter(!is.na(total_cases) & is.na(total_deaths)) %>%
+    slice_tail(n=1)%>%
+    mutate(cfr = (total_deaths/total_cases) * 100) %>%
+    filter(cfr > cfr_threshold)%>%
+    select(location,total_cases,total_deaths,cfr)%>%
+    arrange(desc(cfr))
+}
+
+# List countries with CFR above 3%
+countries_cfr_above_x <- countries_cfr_above_threshold(covid_data, 1.5)
+
+# View the result
+print(countries_above_x)
+
+
 
