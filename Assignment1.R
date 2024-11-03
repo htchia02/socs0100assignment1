@@ -5,8 +5,6 @@ if (!require("pacman")) {
 
 pacman::p_load(
   tidyverse, # tidyverse packages
-  kableExtra,#table
-  flextable, #table
   glue, #combining strings and objects
   ggplot2,
   purrr,
@@ -115,8 +113,12 @@ weekly_case_increase_we <- data %>%
 
 weekly_case_increase_we %>%
   ggplot(aes(x=as.Date(date), y=weekly_case_increase, color=location)) +
-  geom_line()
-#ADD IN LABELS
+  geom_line()+
+  labs(
+    title = "Weekly Case Increase Rate in the United Kingdom",
+    x = "Year",
+    y = "Weekly Case Increase Rate (%)"
+  ) 
 
 
 # Data Visualisation 3 - Number of Cases across various continents
@@ -126,5 +128,33 @@ total_cases_continents <- data %>%
 
 total_cases_continents %>%
   ggplot(aes(x=as.Date(date), y=total_cases, color=location)) +
-  geom_line()
-# ADD IN LABELS
+  geom_line()+
+  labs(
+    title = "Number of Covid-19 cases across time in various continents",
+    x = "Year",
+    y = "Number of Covid-19 cases",
+    color = "Continent"
+  ) +
+  scale_y_continuous(labels = scales::comma) # Changes scentific mathematical numbers in the y-axis to readable numeric format
+
+# Function - Data visualisations for weekly case increase rate in each continent from June 2020 onwards
+
+filtered_df <- data %>% filter(location %in% c("Africa", "Asia","Europe","North America",
+                                               "Oceania","South America","World"))
+start_date <- as.Date("2020-06-01")
+
+create_point_plot <- function(location) {
+  filtered_df %>%
+    filter(location == location, date >= start_date)%>%
+    ggplot(aes(x = as.Date(date), y = weekly_case_increase)) +
+    geom_line() +
+    geom_smooth(method = "lm", color = "blue") +  # Add trend line
+    labs(
+        title = glue("Weekly Case Increase Trend in {location}"),
+        x = "Year",
+        y ="Weekly Case Increase (%)"
+    )
+}
+
+plots_list <- map(unique(filtered_df$location), create_point_plot) # Generates one plot per continent
+plots_grid <- gridExtra::grid.arrange(grobs = plots_list, ncol = 2) # Displays the graphs in two columns
