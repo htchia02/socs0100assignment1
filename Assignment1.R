@@ -71,23 +71,60 @@ data <- data %>%
 data %>%
   select(date,total_deaths,total_cases,cfr)
 
-# Function to list countries above a specified case fatality rate
+# Function to list countries above x% case fatality rate (CFR)
 countries_cfr_above_threshold <- function(data, cfr_threshold) {
+  # Obtain the most recent CFR for each country
   data %>%
-    group_by(location)%>%
-    filter(!is.na(total_cases) & is.na(total_deaths)) %>%
-    slice_tail(n=1)%>%
-    mutate(cfr = (total_deaths/total_cases) * 100) %>%
-    filter(cfr > cfr_threshold)%>%
-    select(location,total_cases,total_deaths,cfr)%>%
-    arrange(desc(cfr))
+    group_by(location) %>%
+    filter(!is.na(total_cases) & !is.na(total_deaths)) %>%
+    slice_tail(n = 1) %>%  # Get the most recent CFR by taking the last row for each country
+    mutate(cfr = (total_deaths / total_cases) * 100) %>%
+    filter(cfr > cfr_threshold) %>%   # Filter countries with CFR above the specified threshold
+    select(location, total_cases, total_deaths, date,cfr) %>% # Select variables to be displayed in output
+    arrange(desc(cfr)) # Arrange output in descending order (highest CFR first)
 }
 
-# List countries with CFR above 3%
-countries_cfr_above_x <- countries_cfr_above_threshold(covid_data, 1.5)
+# List countries with CFR above x% - change x by changing the number below
+countries_cfr_above_x <- countries_cfr_above_threshold(data, 2)
 
-# View the result
-print(countries_above_x)
+# Result
+countries_cfr_above_x
 
 
+# Data Visualisation 1 - case fatality rate over time in low-income countries versus high-income countries
+cfr_over_time <- data %>%
+  filter(location %in% c("Low-income countries", "High-income countries"))%>%
+  group_by(location, date)
+  
+cfr_over_time %>%
+  ggplot(aes(x = as.Date(date), y = cfr, color = location)) +
+  geom_point(alpha=0.1) +
+  geom_smooth(method = 'lm', aes(color=location), size = 0.7)+
+  labs(
+    title = "Case Fatality Rate (CFR) in Low-Income vs High-Income Countries",
+    x = "Year",
+    y = "Case Fatality Rate (%)",
+    color = "Country Income Group"
+  ) 
 
+
+# Data Visualisation 2 - Weekly Case Increase Rate in the UK
+weekly_case_increase_we <- data %>%
+  filter(location %in% c("United Kingdom")) %>%
+  group_by(location,date)
+
+weekly_case_increase_we %>%
+  ggplot(aes(x=as.Date(date), y=weekly_case_increase, color=location)) +
+  geom_line()
+#ADD IN LABELS
+
+
+# Data Visualisation 3 - Number of Cases across various continents
+total_cases_continents <- data %>%
+  filter(location %in% continents) %>%
+  group_by(location,date)
+
+total_cases_continents %>%
+  ggplot(aes(x=as.Date(date), y=total_cases, color=location)) +
+  geom_line()
+# ADD IN LABELS
