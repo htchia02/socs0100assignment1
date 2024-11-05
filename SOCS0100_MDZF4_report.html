@@ -1,0 +1,1237 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.5.57">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>SOCS0100_MDZF4</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="SOCS0100_MDZF4_report_files/libs/clipboard/clipboard.min.js"></script>
+<script src="SOCS0100_MDZF4_report_files/libs/quarto-html/quarto.js"></script>
+<script src="SOCS0100_MDZF4_report_files/libs/quarto-html/popper.min.js"></script>
+<script src="SOCS0100_MDZF4_report_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="SOCS0100_MDZF4_report_files/libs/quarto-html/anchor.min.js"></script>
+<link href="SOCS0100_MDZF4_report_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="SOCS0100_MDZF4_report_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="SOCS0100_MDZF4_report_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="SOCS0100_MDZF4_report_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="SOCS0100_MDZF4_report_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">SOCS0100_MDZF4</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="coronavirus-cases-and-deaths-looking-at-covid-19-data-with-r" class="level1">
+<h1>Coronavirus Cases and Deaths: Looking at Covid-19 Data with R</h1>
+<section id="introduction" class="level2">
+<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
+<div class="justified-text">
+<p>The coronavirus pandemic severely impacted the lives of citizens around the globe. This essay seeks to explore the extent to which quantitative data attests to that statement, through data-wrangling processes that culminate in a series of visualisations to make sense of the data (Wickham et al.&nbsp;2019). In this essay, my analyses of a dataset on Covid-19 cases and deaths reveals countries around the world generally experienced similar infection trends across time, but with varying case fertility rates (CFR). It should be noted that case increase trends tended to be more similar than not across all continents, showing that Covid-19 was indeed a pandemic that affected countries across borders, regardless of income level or continent.</p>
+</div>
+</section>
+<section id="exploring-and-contextualising-data" class="level2">
+<h2 class="anchored" data-anchor-id="exploring-and-contextualising-data">Exploring and Contextualising Data</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Setup </span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(<span class="at">list =</span> <span class="fu">ls</span>()) <span class="co"># Clears environment</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">require</span>(<span class="st">"pacman"</span>)) { <span class="co"># If pacman is not yet installed, it will be installed</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">install.packages</span>(<span class="st">"pacman"</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: pacman</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load packages</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>pacman<span class="sc">::</span><span class="fu">p_load</span>(</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  tidyverse, <span class="co"># tidyverse packages</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  glue, <span class="co"># to combine strings and objects</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  ggplot2, <span class="co"># used in data visualisation</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  skimr) <span class="co"># skim data</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Import data</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"https://github.com/owid/covid-19-data/raw/refs/heads/master/public/data/cases_deaths/full_data.csv"</span>, <span class="at">header =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Skim data to find descriptive statistics </span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="fu">skim</span>(data)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>Data summary</caption>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Name</td>
+<td style="text-align: left;">data</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Number of rows</td>
+<td style="text-align: left;">411804</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Number of columns</td>
+<td style="text-align: left;">10</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">_______________________</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Column type frequency:</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">character</td>
+<td style="text-align: left;">2</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">numeric</td>
+<td style="text-align: left;">8</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">________________________</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Group variables</td>
+<td style="text-align: left;">None</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Variable type: character</strong></p>
+<table class="caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 19%">
+<col style="width: 13%">
+<col style="width: 19%">
+<col style="width: 5%">
+<col style="width: 5%">
+<col style="width: 8%">
+<col style="width: 12%">
+<col style="width: 15%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">skim_variable</th>
+<th style="text-align: right;">n_missing</th>
+<th style="text-align: right;">complete_rate</th>
+<th style="text-align: right;">min</th>
+<th style="text-align: right;">max</th>
+<th style="text-align: right;">empty</th>
+<th style="text-align: right;">n_unique</th>
+<th style="text-align: right;">whitespace</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">date</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1674</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">location</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">32</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">246</td>
+<td style="text-align: right;">0</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Variable type: numeric</strong></p>
+<table class="caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 15%">
+<col style="width: 9%">
+<col style="width: 13%">
+<col style="width: 10%">
+<col style="width: 11%">
+<col style="width: 2%">
+<col style="width: 7%">
+<col style="width: 5%">
+<col style="width: 6%">
+<col style="width: 9%">
+<col style="width: 5%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">skim_variable</th>
+<th style="text-align: right;">n_missing</th>
+<th style="text-align: right;">complete_rate</th>
+<th style="text-align: right;">mean</th>
+<th style="text-align: right;">sd</th>
+<th style="text-align: right;">p0</th>
+<th style="text-align: right;">p25</th>
+<th style="text-align: right;">p50</th>
+<th style="text-align: right;">p75</th>
+<th style="text-align: right;">p100</th>
+<th style="text-align: left;">hist</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">new_cases</td>
+<td style="text-align: right;">1645</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">8017.36</td>
+<td style="text-align: right;">229664.87</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">44236227</td>
+<td style="text-align: left;">▇▁▁▁▁</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">new_deaths</td>
+<td style="text-align: right;">1196</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">71.85</td>
+<td style="text-align: right;">1368.32</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">103719</td>
+<td style="text-align: left;">▇▁▁▁▁</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">total_cases</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">7365292.35</td>
+<td style="text-align: right;">44775816.77</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">6280.75</td>
+<td style="text-align: right;">63653</td>
+<td style="text-align: right;">758272</td>
+<td style="text-align: right;">775866783</td>
+<td style="text-align: left;">▇▁▁▁▁</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">total_deaths</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">81259.57</td>
+<td style="text-align: right;">441190.14</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">43.00</td>
+<td style="text-align: right;">799</td>
+<td style="text-align: right;">9574</td>
+<td style="text-align: right;">7057132</td>
+<td style="text-align: left;">▇▁▁▁▁</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">weekly_cases</td>
+<td style="text-align: right;">2875</td>
+<td style="text-align: right;">0.99</td>
+<td style="text-align: right;">56287.18</td>
+<td style="text-align: right;">606312.78</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">84</td>
+<td style="text-align: right;">2193</td>
+<td style="text-align: right;">44236227</td>
+<td style="text-align: left;">▇▁▁▁▁</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">weekly_deaths</td>
+<td style="text-align: right;">2426</td>
+<td style="text-align: right;">0.99</td>
+<td style="text-align: right;">504.43</td>
+<td style="text-align: right;">3595.46</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">22</td>
+<td style="text-align: right;">103719</td>
+<td style="text-align: left;">▇▁▁▁▁</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">biweekly_cases</td>
+<td style="text-align: right;">4597</td>
+<td style="text-align: right;">0.99</td>
+<td style="text-align: right;">113044.30</td>
+<td style="text-align: right;">1167969.71</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">183</td>
+<td style="text-align: right;">4507</td>
+<td style="text-align: right;">71968927</td>
+<td style="text-align: left;">▇▁▁▁▁</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">biweekly_deaths</td>
+<td style="text-align: right;">4148</td>
+<td style="text-align: right;">0.99</td>
+<td style="text-align: right;">1013.05</td>
+<td style="text-align: right;">7162.04</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">45</td>
+<td style="text-align: right;">204689</td>
+<td style="text-align: left;">▇▁▁▁▁</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="justified-text">
+<p>I chose the “Covid-19 Cases and Deaths Database” dataset to conduct my analysis. This dataset, which has daily observations for the total, weekly and biweekly cases and deaths for all countries, is ideal for further data-wrangling to obtain other meaningful statistics to assess countries’ performances in the pandemic. Moreover, investigating statistics from the Covid-19 pandemic would be helpful in predicting how countries could possibly fare in the future, as has been reflected in past research (Eltoukhy et al., 2020).</p>
+</div>
+<div class="justified-text">
+<p>With 411,804 observations across 10 variables in the dataset, it contains day-by-day observations of Covid-19-related statistics for every country and continent. While there were some missing observations (all variables were at least 99% complete), it is noteworthy that some variables may not have been suitable for data analysis. In particular, the means of the variables for the number of new cases and deaths per day (“new_cases” and “new_deaths” respectively) indicated that on average, there were 8,017 new cases and 71.9 new deaths worldwide daily. This was extremely peculiar, as data from the World Health Organization (see Figure 1 below) revealed that even as of October 2024, where official Covid-19 data may not be as frequently updated, there were still on average 8,091 new cases worldwide daily. As such, 8,017 cases per day from 2019 seemed like an underestimation of the actual number of new cases daily.</p>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figure1.png" class="img-fluid figure-img"></p>
+<figcaption><em><strong>Figure 1</strong>: Screenshot from World Health Organization (2023)’s dashboard on Covid-19 data.</em></figcaption>
+</figure>
+</div>
+<div class="justified-text">
+<p>Indeed, my suspicion was addressed by looking into the standard deviation: high variability levels were found in the data. With a standard deviation of 229,665 cases, daily new case counts could range significantly higher and/or lower than the mean. Moreover, a closer look into the data revealed that some countries’ data were not updated daily (see example below). I postulate that possible reasons are inadequate official statistics reporting procedures, or even that official data in recent years are not frequently updated, since countries are shifting towards co-existence with the virus (Tanabe, 2020; Zhang et al., 2021).</p>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Print data from new_cases and new_deaths variables</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>selected_data <span class="ot">&lt;-</span> data <span class="sc">%&gt;%</span> </span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(date,location,new_cases,new_deaths)<span class="sc">%&gt;%</span> <span class="co"># Select relavant variables</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice</span>(<span class="dv">411374</span><span class="sc">:</span><span class="dv">411386</span>) <span class="co"># Choose only a few rows to be used in the example</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(selected_data) <span class="co"># Print output</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>         date location new_cases new_deaths
+1  2023-06-01 Zimbabwe         0          0
+2  2023-06-02 Zimbabwe         0          0
+3  2023-06-03 Zimbabwe         0          0
+4  2023-06-04 Zimbabwe       129          2
+5  2023-06-05 Zimbabwe         0          0
+6  2023-06-06 Zimbabwe         0          0
+7  2023-06-07 Zimbabwe         0          0
+8  2023-06-08 Zimbabwe         0          0
+9  2023-06-09 Zimbabwe         0          0
+10 2023-06-10 Zimbabwe         0          0
+11 2023-06-11 Zimbabwe         9          0
+12 2023-06-12 Zimbabwe         0          0
+13 2023-06-13 Zimbabwe         0          0</code></pre>
+</div>
+</div>
+<p><em>Example of data for some countries not being updated daily during the pandemic.</em></p>
+<div class="justified-text">
+<p>Similarly, a mean of 504 weekly deaths globally seemed like a far cry from the actual average number of Covid-19 deaths worldwide. This underestimation could either be due to underreporting (portraying a positive image of the Covid-19 situations in various countries) or that excess deaths were not accounted for in the data. Research from Wang and colleagues (2022) showed that an estimated 18,200,000 excess coronavirus-related deaths occurred between 2020-2021. As such, if excess deaths were reflected in the dataset, the number of weekly deaths is expected to increase significantly.</p>
+</div>
+</section>
+<section id="data-wrangling" class="level2">
+<h2 class="anchored" data-anchor-id="data-wrangling">Data-wrangling</h2>
+<div class="justified-text">
+<p>In processing and programming the data, I used Tidyverse to execute four data-wrangling operations:</p>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Data-wrangling 1 - Number of Cases by Continent</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Printing a list of the number of cases by continent can help us to understand how many coronavirus cases were detected in each continent. This may be helpful in studying how pervasive the virus was in each continent.</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Define the continents</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>continents <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Africa"</span>,<span class="st">"Asia"</span>,<span class="st">"Europe"</span>,</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>                <span class="st">"North America"</span>,<span class="st">"Oceania"</span>,<span class="st">"South America"</span>)</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Data-wrangling</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>top_cases_continents <span class="ot">&lt;-</span> data <span class="sc">%&gt;%</span> <span class="co"># Create new data frame to the existing data</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(location <span class="sc">%in%</span> continents) <span class="sc">%&gt;%</span> <span class="co"># Filter out the data for the continents</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(location)<span class="sc">%&gt;%</span> <span class="co"># Group by location</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(date <span class="sc">==</span> <span class="fu">max</span>(date))<span class="sc">%&gt;%</span> <span class="co"># Filter for the most recent data available</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(total_cases)<span class="sc">%&gt;%</span> <span class="co"># Select the variable for total cases in each continent</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(total_cases)) <span class="co"># Arrange the output in descending order</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Adding missing grouping variables: `location`</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Print result</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>top_cases_continents</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 2
+# Groups:   location [6]
+  location      total_cases
+  &lt;chr&gt;               &lt;int&gt;
+1 Asia            301499099
+2 Europe          252916868
+3 North America   124492666
+4 South America    68809418
+5 Oceania          15003352
+6 Africa           13145380</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Data-wrangling 2 - Proportion of cases and deaths by country income</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Country incomes can affect countries' abilities to access vaccines and other resources, which in turn affects how likely people are to get infected or die from the virus.</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Proportion of cases by country income</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>country_income <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"High-income countries"</span>, <span class="st">"Low-income countries"</span>, <span class="st">"Lower-middle-income countries"</span>,<span class="st">"Upper-middle-income countries"</span>) <span class="co"># Define the countries by income level</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>proportion_cases_income <span class="ot">&lt;-</span> data <span class="sc">%&gt;%</span> <span class="co"># Create new dataframe to existing data for the proportion of cases by country income</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(location <span class="sc">%in%</span> country_income) <span class="sc">%&gt;%</span> <span class="co"># Filter for the rows with country income groups</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(date <span class="sc">==</span> <span class="fu">max</span>(date))<span class="sc">%&gt;%</span> <span class="co"># Filter for the most recent data available </span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(date, location) <span class="sc">%&gt;%</span> <span class="co"># Group by date and country income groups</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">total_cases_by_income =</span> <span class="fu">sum</span>(total_cases, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)) <span class="co"># Create summary statistics of total cases by country income group, removing NA values</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>`summarise()` has grouped output by 'date'. You can override using the
+`.groups` argument.</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>world_cases <span class="ot">&lt;-</span> data <span class="sc">%&gt;%</span> <span class="co"># Create new dataframe to existing data for the number of cases in the world</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(location <span class="sc">==</span> <span class="st">"World"</span>) <span class="sc">%&gt;%</span> <span class="co"># Filter for entries with "World" as the location</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(date, <span class="at">world_total_cases =</span> total_cases) <span class="co"># Select the date and rename the total number of cases in the world variable to be included in the output</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>proportion_cases <span class="ot">&lt;-</span> proportion_cases_income <span class="sc">%&gt;%</span> <span class="co"># Create new dataframe to calculate the proportion of cases by income group against the number of global cases</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(world_cases, <span class="at">by =</span> <span class="st">"date"</span>) <span class="sc">%&gt;%</span> <span class="co"># Join the data for income group cases with total cases in the world by date</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">proportion =</span> total_cases_by_income <span class="sc">/</span> world_total_cases) <span class="co"># Calculate proportion of cases by income group</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>proportion_deaths_income <span class="ot">&lt;-</span> data <span class="sc">%&gt;%</span> <span class="co"># Create new dataframe to existing data for the proportion of deaths by country income</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(location <span class="sc">%in%</span> country_income) <span class="sc">%&gt;%</span> <span class="co"># Filter for the rows with country income groups</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(date <span class="sc">==</span> <span class="fu">max</span>(date))<span class="sc">%&gt;%</span> <span class="co"># Filter for the most recent data available</span></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(date, location) <span class="sc">%&gt;%</span> <span class="co"># Group by date and country income groups</span></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">total_deaths_by_income =</span> <span class="fu">sum</span>(total_deaths, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)) <span class="co"># Create summary statistics of total deaths by country income group, removing NA values</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>`summarise()` has grouped output by 'date'. You can override using the
+`.groups` argument.</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>world_deaths <span class="ot">&lt;-</span> data <span class="sc">%&gt;%</span> <span class="co"># Create new dataframe to existing data for the number of Covid-19 deaths in the world</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(location <span class="sc">==</span> <span class="st">"World"</span>) <span class="sc">%&gt;%</span> <span class="co"># Filter for entries with "World" as the location</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(date, <span class="at">world_total_deaths =</span> total_deaths) <span class="co"># Select the date and rename the total number of Covid-19 deaths in the world variable to be included in the output</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>proportion_deaths <span class="ot">&lt;-</span> proportion_deaths_income <span class="sc">%&gt;%</span> <span class="co"># Create new dataframe to calculate the proportion of Covid-19 deaths by income group against the number of global Covid-19 deaths</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(world_deaths, <span class="at">by =</span> <span class="st">"date"</span>) <span class="sc">%&gt;%</span> <span class="co"># Join the data for income group deaths with total Covid-19 deaths in the world by date</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">proportion =</span> total_deaths_by_income <span class="sc">/</span> world_total_deaths) <span class="co"># Calculate proportion of Covid-19 deaths by income group</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Print results</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>proportion_cases</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 4 × 5
+# Groups:   date [1]
+  date       location         total_cases_by_income world_total_cases proportion
+  &lt;chr&gt;      &lt;chr&gt;                            &lt;int&gt;             &lt;int&gt;      &lt;dbl&gt;
+1 2024-08-04 High-income cou…             429044049         775866783    0.553  
+2 2024-08-04 Low-income coun…               1944334         775866783    0.00251
+3 2024-08-04 Lower-middle-in…              91954400         775866783    0.119  
+4 2024-08-04 Upper-middle-in…             251753518         775866783    0.324  </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>proportion_deaths</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 4 × 5
+# Groups:   date [1]
+  date       location       total_deaths_by_income world_total_deaths proportion
+  &lt;chr&gt;      &lt;chr&gt;                           &lt;int&gt;              &lt;int&gt;      &lt;dbl&gt;
+1 2024-08-04 High-income c…                2997359            7057132    0.425  
+2 2024-08-04 Low-income co…                  43529            7057132    0.00617
+3 2024-08-04 Lower-middle-…                1188026            7057132    0.168  
+4 2024-08-04 Upper-middle-…                2824452            7057132    0.400  </code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Data-wrangling 3 - Rate of weekly case and death increase</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculating the rate of case and death increase rates in each location can help us understand how good or bad the Covid-19 situation was in each location at any given date.</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> data <span class="sc">%&gt;%</span> <span class="co"># Store the results of these data-wrangling in the original dataframe</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(location,date)<span class="sc">%&gt;%</span> <span class="co"># Arrange the data by location and date</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(location)<span class="sc">%&gt;%</span> <span class="co"># Group data by location</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">weekly_case_increase =</span> ((weekly_cases <span class="sc">-</span> <span class="fu">lag</span>(weekly_cases)) <span class="sc">/</span> <span class="fu">lag</span>(weekly_cases)) <span class="sc">*</span><span class="dv">100</span>, <span class="co"># Calculate the weekly case increase rate of all locations as a percentage</span></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>         <span class="at">weekly_death_increase =</span> ((weekly_deaths <span class="sc">-</span> <span class="fu">lag</span>(weekly_deaths)) <span class="sc">/</span> <span class="fu">lag</span>(weekly_deaths)) <span class="sc">*</span><span class="dv">100</span>) <span class="co"># Calculate the weekly death increase rate of all locations as a percentage</span></span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>data <span class="sc">%&gt;%</span></span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(date,weekly_case_increase,weekly_death_increase) <span class="co"># Select the date, weekly case increase rate and weekly death increase rate variables to be displayed in the output</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Adding missing grouping variables: `location`</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 411,804 × 4
+# Groups:   location [246]
+   location    date       weekly_case_increase weekly_death_increase
+   &lt;chr&gt;       &lt;chr&gt;                     &lt;dbl&gt;                 &lt;dbl&gt;
+ 1 Afghanistan 2020-01-05                   NA                    NA
+ 2 Afghanistan 2020-01-06                   NA                    NA
+ 3 Afghanistan 2020-01-07                   NA                    NA
+ 4 Afghanistan 2020-01-08                   NA                    NA
+ 5 Afghanistan 2020-01-09                   NA                    NA
+ 6 Afghanistan 2020-01-10                   NA                    NA
+ 7 Afghanistan 2020-01-11                  NaN                   NaN
+ 8 Afghanistan 2020-01-12                  NaN                   NaN
+ 9 Afghanistan 2020-01-13                  NaN                   NaN
+10 Afghanistan 2020-01-14                  NaN                   NaN
+# ℹ 411,794 more rows</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Data-wrangling 4 - Case Fatality Rate (CFR)</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="co"># The case fatality rate, which is measured in terms of total deaths over the total number of cases, can help us understand how fatal the coronavirus is in each location around the world.</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> data <span class="sc">%&gt;%</span> <span class="co"># Store the results of these data-wrangling in the original dataframe</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(date)<span class="sc">%&gt;%</span> <span class="co"># Arrange the existing data by date</span></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(location)<span class="sc">%&gt;%</span> <span class="co"># Group by location, such that countries would be in alphabetical order</span></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">cfr =</span> (total_deaths<span class="sc">/</span>total_cases) <span class="sc">*</span> <span class="dv">100</span>) <span class="co"># Calculate the CFR as a percentage</span></span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>data <span class="sc">%&gt;%</span> </span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(date,total_deaths,total_cases,cfr) <span class="co"># Select the date, total deaths, total cases and CFR variables to be displayed in the output</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Adding missing grouping variables: `location`</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 411,804 × 5
+# Groups:   location [246]
+   location            date       total_deaths total_cases   cfr
+   &lt;chr&gt;               &lt;chr&gt;             &lt;int&gt;       &lt;int&gt; &lt;dbl&gt;
+ 1 Afghanistan         2020-01-05            0           0   NaN
+ 2 Africa              2020-01-05            0           0   NaN
+ 3 Albania             2020-01-05            0           0   NaN
+ 4 Algeria             2020-01-05            0           0   NaN
+ 5 American Samoa      2020-01-05            0           0   NaN
+ 6 Andorra             2020-01-05            0           0   NaN
+ 7 Angola              2020-01-05            0           0   NaN
+ 8 Anguilla            2020-01-05            0           0   NaN
+ 9 Antigua and Barbuda 2020-01-05            0           0   NaN
+10 Argentina           2020-01-05            0           0   NaN
+# ℹ 411,794 more rows</code></pre>
+</div>
+</div>
+<div class="justified-text">
+<p>Building on the code that I had written to determine the Case Fatality Rate (CFR) for each country, I created a function to generate a list of countries above a specified CFR, as of the latest datapoint available in the dataset.</p>
+</div>
+<div class="justified-text">
+<p>This function generates a list of countries for a CFR threshold specified. With this function, researchers can easily obtain a list that reflects the fatality rates in different countries. It is a helpful tool that eliminates the need for researchers having to scroll through a long list of case fatality rates for all countries and instead filters and presents the information that the researcher wishes to obtain.</p>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Function to generate a list of countries above a given case fatality rate (CFR)</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>countries_cfr_above_threshold <span class="ot">&lt;-</span> <span class="cf">function</span>(data, cfr_threshold) {</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Obtain the most recent CFR for each country</span></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>  data <span class="sc">%&gt;%</span></span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(location) <span class="sc">%&gt;%</span> <span class="co"># Group data by location, in alphabetical order</span></span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(total_cases) <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">is.na</span>(total_deaths)) <span class="sc">%&gt;%</span> <span class="co"># Filter for total cases and total deaths, removing for NA values</span></span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">slice_tail</span>(<span class="at">n =</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span>  <span class="co"># Get the most recent CFR by taking the last row for each country</span></span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">cfr =</span> (total_deaths <span class="sc">/</span> total_cases) <span class="sc">*</span> <span class="dv">100</span>) <span class="sc">%&gt;%</span> <span class="co"># Calculate CFR as a percentage</span></span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(cfr <span class="sc">&gt;</span> cfr_threshold) <span class="sc">%&gt;%</span>   <span class="co"># Filter countries with CFR above the specified threshold</span></span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(location, total_cases, total_deaths, date,cfr) <span class="sc">%&gt;%</span> <span class="co"># Select variables to be displayed in output</span></span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">arrange</span>(<span class="fu">desc</span>(cfr)) <span class="co"># Arrange output in descending order (highest CFR first)</span></span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a>  <span class="co"># List countries with CFR above x% - change x by changing the number below (here, the percentage is 2%)</span></span>
+<span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a>countries_cfr_above_x <span class="ot">&lt;-</span> <span class="fu">countries_cfr_above_threshold</span>(data, <span class="dv">2</span>)</span>
+<span id="cb24-17"><a href="#cb24-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-18"><a href="#cb24-18" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Print result</span></span>
+<span id="cb24-19"><a href="#cb24-19" aria-hidden="true" tabindex="-1"></a>countries_cfr_above_x</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 40 × 5
+# Groups:   location [40]
+   location               total_cases total_deaths date         cfr
+   &lt;chr&gt;                        &lt;int&gt;        &lt;int&gt; &lt;chr&gt;      &lt;dbl&gt;
+ 1 Yemen                        11945         2159 2024-08-04 18.1 
+ 2 Sudan                        63993         5046 2024-08-04  7.89
+ 3 Syria                        57423         3163 2024-08-04  5.51
+ 4 Somalia                      27334         1361 2024-08-04  4.98
+ 5 Peru                       4526977       220975 2024-08-04  4.88
+ 6 Egypt                       516023        24830 2024-08-04  4.81
+ 7 Mexico                     7619458       334551 2024-08-04  4.39
+ 8 Bosnia and Herzegovina      403666        16392 2024-08-04  4.06
+ 9 Liberia                       7930          294 2024-08-04  3.71
+10 Afghanistan                 235214         7998 2024-08-04  3.40
+# ℹ 30 more rows</code></pre>
+</div>
+</div>
+</section>
+<section id="visualising-data" class="level2">
+<h2 class="anchored" data-anchor-id="visualising-data">Visualising Data</h2>
+<div class="justified-text">
+<p>To provide a visual explanation of the data, I used ggplot2 derived from the refined datasets in the previous section of the report.</p>
+</div>
+<div class="justified-text:::">
+<p>For the first visualisation, I did a point plot with a best fit curve for each country income group as it can present the data in a clear, de-cluttered manner. The graph reveals that the CFR was higher in high-income countries between 2020-2021, and then became lower than low-income countries from mid-2021 onwards. This could possibly be attributed to the proliferation of Covid-19 vaccines. Since high-income countries disproportionately had greater access to these vaccines than low-income countries (Duan et al., 2021), it is expected that the CFR in high-income countries decreased over time.</p>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Data Visualisation 1 - Case fatality rate over time in low-income countries versus high-income countries</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>cfr_over_time <span class="ot">&lt;-</span> data <span class="sc">%&gt;%</span> <span class="co"># Store the results of the data-wrangling in the original dataframe</span></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(location <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Low-income countries"</span>, <span class="st">"High-income countries"</span>))<span class="sc">%&gt;%</span> <span class="co"># Filter out the data points for low-income countries and high-income countries</span></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(location, date) <span class="co"># Group these data points by location (low or high-income countries) and date</span></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>cfr_over_time <span class="sc">%&gt;%</span></span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">as.Date</span>(date), <span class="at">y =</span> cfr, <span class="at">color =</span> location)) <span class="sc">+</span> <span class="co"># Graph with x-variable being date (time) and y-variable being the case fatality rate. The countries' income group is differentiated by two colours in the graph.</span></span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha=</span><span class="fl">0.1</span>) <span class="sc">+</span> <span class="co"># Point plot, with transparency being 0.1 so that the line of best fit can be better seen.</span></span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>( <span class="fu">aes</span>(<span class="at">color=</span>location), <span class="at">size =</span> <span class="fl">0.7</span>)<span class="sc">+</span> <span class="co"># Curve of best fit, made thinner to see the distinctions between both lines in the graph</span></span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>( <span class="co"># Labels for graph</span></span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Case Fatality Rate (CFR) in Low-Income vs High-Income Countries"</span>,</span>
+<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Year"</span>,</span>
+<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Case Fatality Rate (%)"</span>,</span>
+<span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">color =</span> <span class="st">"Country Income Group"</span></span>
+<span id="cb26-15"><a href="#cb26-15" aria-hidden="true" tabindex="-1"></a>  ) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
+ℹ Please use `linewidth` instead.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>`geom_smooth()` using method = 'gam' and formula = 'y ~ s(x, bs = "cs")'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 56 rows containing non-finite outside the scale range
+(`stat_smooth()`).</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 56 rows containing missing values or values outside the scale range
+(`geom_point()`).</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="SOCS0100_MDZF4_report_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="justified-text:::">
+<p>From the case increase rate obtained earlier, I did a visualisation for the case increase rate specific to the UK, as including more countries would have made the graph over-cluttered. I chose a line graph for this plot, as it would have made the fluctuations seen in the graph more obvious. As such, the rate of increase/decrease could be interpreted easily.</p>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Data Visualisation 2 - Weekly Case Increase Rate in the UK</span></span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>weekly_case_increase_we <span class="ot">&lt;-</span> data <span class="sc">%&gt;%</span> <span class="co"># Store the results of the data-wrangling in the original dataframe</span></span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(location <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"United Kingdom"</span>)) <span class="sc">%&gt;%</span> <span class="co"># Filter for a specific country, in this example I used the UK</span></span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(location,date) <span class="co"># Group data by location (the UK) and date, in ascending order</span></span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>weekly_case_increase_we <span class="sc">%&gt;%</span></span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span><span class="fu">as.Date</span>(date), <span class="at">y=</span>weekly_case_increase)) <span class="sc">+</span> <span class="co"># Graph with x-variable being date (time), y-variable being weekly case increase. </span></span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>()<span class="sc">+</span> <span class="co"># Line graph to illustrate the fluctuations in case increase/decrease over time.</span></span>
+<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>( <span class="co"># Labels for graph</span></span>
+<span id="cb31-10"><a href="#cb31-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Weekly Case Increase Rate in the United Kingdom"</span>,</span>
+<span id="cb31-11"><a href="#cb31-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Year"</span>,</span>
+<span id="cb31-12"><a href="#cb31-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Weekly Case Increase Rate (%)"</span></span>
+<span id="cb31-13"><a href="#cb31-13" aria-hidden="true" tabindex="-1"></a>  ) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 28 rows containing missing values or values outside the scale range
+(`geom_line()`).</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="SOCS0100_MDZF4_report_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="justified-text:::">
+<p>Here, I also chose a line graph to represent the number of cases over time in each continent. Asia and Europe have significantly higher case numbers than the rest of the world. Where research by McKay et al.&nbsp;(2024) has shown that there is evidence to suggest that Africa experienced levels of infection similar to the rest of the world, I believe that the low numbers of African Covid-19 cases reflected may be due to underreporting or inadequate organisational structures to accurately reflect the Covid-19 situation in Africa.</p>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Data Visualisation 3 - Number of Cases across various continents</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>total_cases_continents <span class="ot">&lt;-</span> data <span class="sc">%&gt;%</span> <span class="co"># Store the results of the data-wrangling in the original dataframe</span></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(location <span class="sc">%in%</span> continents) <span class="sc">%&gt;%</span> <span class="co"># Filter for continents, as used above</span></span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(location,date) <span class="co"># Group data by the continents, and date (time)</span></span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>total_cases_continents <span class="sc">%&gt;%</span></span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span><span class="fu">as.Date</span>(date), <span class="at">y=</span>total_cases, <span class="at">color=</span>location)) <span class="sc">+</span> <span class="co"># Graph with x-variable being date (time), y-variable being the total cases in each continent. The colour of each line will differentiate the continents.</span></span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>()<span class="sc">+</span> <span class="co"># Line graph so that the trajectory of cases is clear</span></span>
+<span id="cb33-9"><a href="#cb33-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>( <span class="co"># Labels for graph</span></span>
+<span id="cb33-10"><a href="#cb33-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Number of Covid-19 cases across time in various continents"</span>,</span>
+<span id="cb33-11"><a href="#cb33-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Year"</span>,</span>
+<span id="cb33-12"><a href="#cb33-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Number of Covid-19 cases"</span>,</span>
+<span id="cb33-13"><a href="#cb33-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">color =</span> <span class="st">"Continent"</span></span>
+<span id="cb33-14"><a href="#cb33-14" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb33-15"><a href="#cb33-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">labels =</span> scales<span class="sc">::</span>comma) <span class="co"># Changes scentific mathematical numbers in the y-axis to readable numeric format</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="SOCS0100_MDZF4_report_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="justified-text">
+<p>I wrote a function to display visualisations of weekly case increase rates in each continent from June 2020. This function is necessary if one wishes to compare how Covid-19 cases increased in each continent over time, to find any similarities and/or differences in the trend. The function revealed that while there were minor differences across the continents, the general infection trend was largely similar - testament to how different Covid-19 strains reached the continents one after another, causing a surge in infections.</p>
+<p>To write this function, I first filtered a dataframe for the continents (including World statistics). Then, I created the function, which would generate line graphs of the weekly case infection rates for each continent. I then mapped the function to each continent, generating one plot per continent and displayed the graphs in two columns for easier reference.</p>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Function - Data visualisations for weekly case increase rate in each continent</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>filtered_df <span class="ot">&lt;-</span> data <span class="sc">%&gt;%</span> </span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(location <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Africa"</span>, <span class="st">"Asia"</span>,<span class="st">"Europe"</span>,<span class="st">"North America"</span>,</span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>                         <span class="st">"Oceania"</span>,<span class="st">"South America"</span>,<span class="st">"World"</span>)) <span class="co"># Dataframe to filter the continents and World statistics</span></span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>start_date <span class="ot">&lt;-</span> <span class="fu">as.Date</span>(<span class="st">"2020-06-01"</span>) <span class="co"># Define the start date as 1 June 2020</span></span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>create_point_plot <span class="ot">&lt;-</span> <span class="cf">function</span>(location) { <span class="co"># Define function that creates a point plot for each continent's weekly case increase rate</span></span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>  filtered_df <span class="sc">%&gt;%</span></span>
+<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(location <span class="sc">==</span> location, date <span class="sc">&gt;=</span> start_date)<span class="sc">%&gt;%</span> <span class="co"># Filter data for the locations listed above and from the start date listed above</span></span>
+<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">as.Date</span>(date), <span class="at">y =</span> weekly_case_increase)) <span class="sc">+</span> <span class="co"># Graph with x-variable as the date (time, from 1 June 2020 onwards), and y-variable as the rate of weekly case increase</span></span>
+<span id="cb34-12"><a href="#cb34-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>() <span class="sc">+</span> <span class="co"># Creates a line graph</span></span>
+<span id="cb34-13"><a href="#cb34-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_smooth</span>(<span class="at">color =</span> <span class="st">"blue"</span>) <span class="sc">+</span>  <span class="co"># Add curve of best fit to determine the trend</span></span>
+<span id="cb34-14"><a href="#cb34-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(</span>
+<span id="cb34-15"><a href="#cb34-15" aria-hidden="true" tabindex="-1"></a>        <span class="at">title =</span> <span class="fu">glue</span>(<span class="st">"Weekly Case Increase Trend in {location}"</span>),</span>
+<span id="cb34-16"><a href="#cb34-16" aria-hidden="true" tabindex="-1"></a>        <span class="at">x =</span> <span class="st">"Year"</span>,</span>
+<span id="cb34-17"><a href="#cb34-17" aria-hidden="true" tabindex="-1"></a>        <span class="at">y =</span><span class="st">"Weekly Case Increase (%)"</span></span>
+<span id="cb34-18"><a href="#cb34-18" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb34-19"><a href="#cb34-19" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb34-20"><a href="#cb34-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-21"><a href="#cb34-21" aria-hidden="true" tabindex="-1"></a>plots_list <span class="ot">&lt;-</span> <span class="fu">map</span>(<span class="fu">unique</span>(filtered_df<span class="sc">$</span>location), create_point_plot) <span class="co"># Maps the function to each continent, generating separate plots for each continent</span></span>
+<span id="cb34-22"><a href="#cb34-22" aria-hidden="true" tabindex="-1"></a>plots_grid <span class="ot">&lt;-</span> gridExtra<span class="sc">::</span><span class="fu">grid.arrange</span>(<span class="at">grobs =</span> plots_list, <span class="at">ncol =</span> <span class="dv">2</span>) <span class="co"># Displays the graphs in two columns, making them easier to compare</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>`geom_smooth()` using method = 'gam' and formula = 'y ~ s(x, bs = "cs")'
+`geom_smooth()` using method = 'gam' and formula = 'y ~ s(x, bs = "cs")'
+`geom_smooth()` using method = 'gam' and formula = 'y ~ s(x, bs = "cs")'
+`geom_smooth()` using method = 'gam' and formula = 'y ~ s(x, bs = "cs")'
+`geom_smooth()` using method = 'gam' and formula = 'y ~ s(x, bs = "cs")'
+`geom_smooth()` using method = 'gam' and formula = 'y ~ s(x, bs = "cs")'
+`geom_smooth()` using method = 'gam' and formula = 'y ~ s(x, bs = "cs")'</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="SOCS0100_MDZF4_report_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="critical-engagement-with-ai" class="level2">
+<h2 class="anchored" data-anchor-id="critical-engagement-with-ai">Critical Engagement with AI</h2>
+<div class="justified-text">
+<p>I used generative AI chatbots like ChatGPT to assist me in fine-tuning my code. Through this engagement, I noticed how ChatGPT, while being an impressive tool in providing me clarity to any doubts I may have over the mistakes I made, is also a tool that may not accurately complete tasks.</p>
+</div>
+<div class="justified-text">
+<p>AI was extremely helpful in providing explanations to any error messages that I received while running the code I have written. For example, I was unsure why my code was wrong while writing a function, as I had already defined ‘continent’ in earlier parts of the code. Putting this into ChatGPT and asking why it was wrong gave me clarity on where my code went wrong and how to fix it (see Figure 2 below). Furthermore, AI could interpret the machine-like error messages to me in a human fashion. This powerful tool helped me to better understand how I could edit my code. ChatGPT was extremely helpful in pointing out any oversights I made while coding. Learning from this mistake, I was careful of such mistakes as I continued with the assignment. Hence, AI is a useful tool in illustrating my mistakes and teaching me how to amend my code to make it work.</p>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figure2.png" class="img-fluid figure-img"></p>
+<figcaption><em><strong>Figure 2</strong>: Screenshot from ChatGPT illustrating where my code went wrong.</em></figcaption>
+</figure>
+</div>
+<div class="justified-text">
+<p>However, insofar as AI was helpful in pointing out my mistakes, I learnt that it still may give false or misleading suggestions, especially in the context of coding. In the process of fixing mistakes from my code in the case fatality rates function (see above), I asked ChatGPT if <code>purrr::map</code> could be used. ChatGPT then generated a code with <code>purrr::map</code> in the function (see: Figure 3).</p>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figure3.png" class="img-fluid figure-img"></p>
+<figcaption><em><strong>Figure 3</strong>: Screenshot from ChatGPT with code it generated teaching me how to use the <code>purrr::map</code> function to write my function.</em></figcaption>
+</figure>
+</div>
+<div class="justified-text">
+<p>Yet, upon closer inspection of the code it had generated, I found no trace of <code>purrr::map</code> being used. I further questioned if it was used, to which ChatGPT admitted that the result did not use<code>purrr::map</code> as <code>dplyr</code> operations were sufficient to code the function I wanted (see: Figure 4).</p>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figure4.png" class="img-fluid figure-img"></p>
+<figcaption><em><strong>Figure 4</strong>: Screenshot from ChatGPT, where it admits that <code>purrr::map</code> was not used in the code it generated.</em></figcaption>
+</figure>
+</div>
+<div class="justified-text">
+<p>This experience with ChatGPT made me realise how important it is not to wholeheartedly trust the results generated by AI, as AI has the capacity to make mistakes as well. The use of AI, especially in the context of coding, still requires prerequisite knowledge of the language. In this example, if I had no knowledge of <code>purrr::map</code> and simply used whatever ChatGPT had generated, I would have made a serious mistake of thinking that <code>purrr::map</code> was actually applied to the function. It is imperative, hence, that usage of AI is carried out carefully – that all results generated by AI are checked and verified by the human behind the computer.</p>
+</div>
+</section>
+<section id="conclusion" class="level2">
+<h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
+<div class="justified-text">
+<p>In this essay, I analysed a dataset of Covid-19 cases and deaths across the world, and illustrated these data-wrangling and data visualisation processes. I found that Covid-19, a pervasive disease had indeed affected all places around the globe. Even though the visualisations reveal that Covid-19 affected poorer regions worse than richer regions globally, I believe that the actual extent to which poorer regions were impacted by Covid-19 may not be accurately reflected in this dataset, as official statistics may not be truly reflective of the actual cases and deaths that occur in poorer countries. In my interactions with AI, I learnt how it can be a helpful tool to generate solutions to coding problems, but still must be used with caution and awareness of coding. The solutions generated by AI must be checked by humans before they are adopted, to prevent false or wrong data analyses.</p>
+</div>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

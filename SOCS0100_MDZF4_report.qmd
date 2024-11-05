@@ -1,0 +1,327 @@
+---
+title: "SOCS0100_MDZF4"
+format: html
+editor: visual
+css: style.css
+---
+
+# Coronavirus Cases and Deaths: Looking at Covid-19 Data with R
+
+## Introduction
+
+::: justified-text
+The coronavirus pandemic severely impacted the lives of citizens around the globe. This essay seeks to explore the extent to which quantitative data attests to that statement, through data-wrangling processes that culminate in a series of visualisations to make sense of the data (Wickham et al. 2019). In this essay, my analyses of a dataset on Covid-19 cases and deaths reveals countries around the world generally experienced similar infection trends across time, but with varying case fertility rates (CFR). It should be noted that case increase trends tended to be more similar than not across all continents, showing that Covid-19 was indeed a pandemic that affected countries across borders, regardless of income level or continent.
+:::
+
+## Exploring and Contextualising Data
+
+```{r}
+# Setup 
+rm(list = ls()) # Clears environment
+if (!require("pacman")) { # If pacman is not yet installed, it will be installed
+  install.packages("pacman")
+}
+
+# Load packages
+pacman::p_load(
+  tidyverse, # tidyverse packages
+  glue, # to combine strings and objects
+  ggplot2, # used in data visualisation
+  skimr) # skim data
+
+# Import data
+data <- read.csv("https://github.com/owid/covid-19-data/raw/refs/heads/master/public/data/cases_deaths/full_data.csv", header = TRUE)
+
+# Skim data to find descriptive statistics 
+skim(data)
+```
+
+::: justified-text
+I chose the “Covid-19 Cases and Deaths Database” dataset to conduct my analysis. This dataset, which has daily observations for the total, weekly and biweekly cases and deaths for all countries, is ideal for further data-wrangling to obtain other meaningful statistics to assess countries’ performances in the pandemic. Moreover, investigating statistics from the Covid-19 pandemic would be helpful in predicting how countries could possibly fare in the future, as has been reflected in past research (Eltoukhy et al., 2020).
+:::
+
+::: justified-text
+With 411,804 observations across 10 variables in the dataset, it contains day-by-day observations of Covid-19-related statistics for every country and continent. While there were some missing observations (all variables were at least 99% complete), it is noteworthy that some variables may not have been suitable for data analysis. In particular, the means of the variables for the number of new cases and deaths per day (“new_cases” and “new_deaths” respectively) indicated that on average, there were 8,017 new cases and 71.9 new deaths worldwide daily. This was extremely peculiar, as data from the World Health Organization (see Figure 1 below) revealed that even as of October 2024, where official Covid-19 data may not be as frequently updated, there were still on average 8,091 new cases worldwide daily. As such, 8,017 cases per day from 2019 seemed like an underestimation of the actual number of new cases daily.
+:::
+
+![***Figure 1**: Screenshot from World Health Organization (2023)’s dashboard on Covid-19 data.*](figure1.png)
+
+::: justified-text
+Indeed, my suspicion was addressed by looking into the standard deviation: high variability levels were found in the data. With a standard deviation of 229,665 cases, daily new case counts could range significantly higher and/or lower than the mean. Moreover, a closer look into the data revealed that some countries’ data were not updated daily (see example below). I postulate that possible reasons are inadequate official statistics reporting procedures, or even that official data in recent years are not frequently updated, since countries are shifting towards co-existence with the virus (Tanabe, 2020; Zhang et al., 2021).
+:::
+
+```{r}
+# Print data from new_cases and new_deaths variables
+selected_data <- data %>% 
+  select(date,location,new_cases,new_deaths)%>% # Select relavant variables
+  slice(411374:411386) # Choose only a few rows to be used in the example
+
+print(selected_data) # Print output
+```
+
+*Example of data for some countries not being updated daily during the pandemic.*
+
+::: justified-text
+Similarly, a mean of 504 weekly deaths globally seemed like a far cry from the actual average number of Covid-19 deaths worldwide. This underestimation could either be due to underreporting (portraying a positive image of the Covid-19 situations in various countries) or that excess deaths were not accounted for in the data. Research from Wang and colleagues (2022) showed that an estimated 18,200,000 excess coronavirus-related deaths occurred between 2020-2021. As such, if excess deaths were reflected in the dataset, the number of weekly deaths is expected to increase significantly.
+:::
+
+## Data-wrangling
+
+::: justified-text
+In processing and programming the data, I used Tidyverse to execute four data-wrangling operations:
+:::
+
+```{r}
+# Data-wrangling 1 - Number of Cases by Continent
+# Printing a list of the number of cases by continent can help us to understand how many coronavirus cases were detected in each continent. This may be helpful in studying how pervasive the virus was in each continent.
+
+# Define the continents
+continents <- c("Africa","Asia","Europe",
+                "North America","Oceania","South America")
+
+# Data-wrangling
+top_cases_continents <- data %>% # Create new data frame to the existing data
+  filter(location %in% continents) %>% # Filter out the data for the continents
+  group_by(location)%>% # Group by location
+  filter(date == max(date))%>% # Filter for the most recent data available
+  select(total_cases)%>% # Select the variable for total cases in each continent
+  arrange(desc(total_cases)) # Arrange the output in descending order
+  
+# Print result
+top_cases_continents
+```
+
+```{r}
+# Data-wrangling 2 - Proportion of cases and deaths by country income
+# Country incomes can affect countries' abilities to access vaccines and other resources, which in turn affects how likely people are to get infected or die from the virus.
+
+# Proportion of cases by country income
+country_income <- c("High-income countries", "Low-income countries", "Lower-middle-income countries","Upper-middle-income countries") # Define the countries by income level
+
+proportion_cases_income <- data %>% # Create new dataframe to existing data for the proportion of cases by country income
+  filter(location %in% country_income) %>% # Filter for the rows with country income groups
+  filter(date == max(date))%>% # Filter for the most recent data available 
+  group_by(date, location) %>% # Group by date and country income groups
+  summarise(total_cases_by_income = sum(total_cases, na.rm = TRUE)) # Create summary statistics of total cases by country income group, removing NA values
+
+world_cases <- data %>% # Create new dataframe to existing data for the number of cases in the world
+  filter(location == "World") %>% # Filter for entries with "World" as the location
+  select(date, world_total_cases = total_cases) # Select the date and rename the total number of cases in the world variable to be included in the output
+
+proportion_cases <- proportion_cases_income %>% # Create new dataframe to calculate the proportion of cases by income group against the number of global cases
+  left_join(world_cases, by = "date") %>% # Join the data for income group cases with total cases in the world by date
+  mutate(proportion = total_cases_by_income / world_total_cases) # Calculate proportion of cases by income group
+
+
+proportion_deaths_income <- data %>% # Create new dataframe to existing data for the proportion of deaths by country income
+  filter(location %in% country_income) %>% # Filter for the rows with country income groups
+  filter(date == max(date))%>% # Filter for the most recent data available
+  group_by(date, location) %>% # Group by date and country income groups
+  summarise(total_deaths_by_income = sum(total_deaths, na.rm = TRUE)) # Create summary statistics of total deaths by country income group, removing NA values
+
+world_deaths <- data %>% # Create new dataframe to existing data for the number of Covid-19 deaths in the world
+  filter(location == "World") %>% # Filter for entries with "World" as the location
+  select(date, world_total_deaths = total_deaths) # Select the date and rename the total number of Covid-19 deaths in the world variable to be included in the output
+
+proportion_deaths <- proportion_deaths_income %>% # Create new dataframe to calculate the proportion of Covid-19 deaths by income group against the number of global Covid-19 deaths
+  left_join(world_deaths, by = "date") %>% # Join the data for income group deaths with total Covid-19 deaths in the world by date
+  mutate(proportion = total_deaths_by_income / world_total_deaths) # Calculate proportion of Covid-19 deaths by income group
+
+
+# Print results
+proportion_cases
+proportion_deaths
+```
+
+```{r}
+# Data-wrangling 3 - Rate of weekly case and death increase
+# Calculating the rate of case and death increase rates in each location can help us understand how good or bad the Covid-19 situation was in each location at any given date.
+
+data <- data %>% # Store the results of these data-wrangling in the original dataframe
+  arrange(location,date)%>% # Arrange the data by location and date
+  group_by(location)%>% # Group data by location
+  mutate(weekly_case_increase = ((weekly_cases - lag(weekly_cases)) / lag(weekly_cases)) *100, # Calculate the weekly case increase rate of all locations as a percentage
+         weekly_death_increase = ((weekly_deaths - lag(weekly_deaths)) / lag(weekly_deaths)) *100) # Calculate the weekly death increase rate of all locations as a percentage
+
+data %>%
+  select(date,weekly_case_increase,weekly_death_increase) # Select the date, weekly case increase rate and weekly death increase rate variables to be displayed in the output
+```
+
+```{r}
+# Data-wrangling 4 - Case Fatality Rate (CFR)
+# The case fatality rate, which is measured in terms of total deaths over the total number of cases, can help us understand how fatal the coronavirus is in each location around the world.
+
+data <- data %>% # Store the results of these data-wrangling in the original dataframe
+  arrange(date)%>% # Arrange the existing data by date
+  group_by(location)%>% # Group by location, such that countries would be in alphabetical order
+  mutate(cfr = (total_deaths/total_cases) * 100) # Calculate the CFR as a percentage
+
+data %>% 
+  select(date,total_deaths,total_cases,cfr) # Select the date, total deaths, total cases and CFR variables to be displayed in the output
+```
+
+::: justified-text
+Building on the code that I had written to determine the Case Fatality Rate (CFR) for each country, I created a function to generate a list of countries above a specified CFR, as of the latest datapoint available in the dataset.
+:::
+
+::: justified-text
+This function generates a list of countries for a CFR threshold specified. With this function, researchers can easily obtain a list that reflects the fatality rates in different countries. It is a helpful tool that eliminates the need for researchers having to scroll through a long list of case fatality rates for all countries and instead filters and presents the information that the researcher wishes to obtain.
+:::
+
+```{r}
+# Function to generate a list of countries above a given case fatality rate (CFR)
+
+countries_cfr_above_threshold <- function(data, cfr_threshold) {
+  # Obtain the most recent CFR for each country
+  data %>%
+    group_by(location) %>% # Group data by location, in alphabetical order
+    filter(!is.na(total_cases) & !is.na(total_deaths)) %>% # Filter for total cases and total deaths, removing for NA values
+    slice_tail(n = 1) %>%  # Get the most recent CFR by taking the last row for each country
+    mutate(cfr = (total_deaths / total_cases) * 100) %>% # Calculate CFR as a percentage
+    filter(cfr > cfr_threshold) %>%   # Filter countries with CFR above the specified threshold
+    select(location, total_cases, total_deaths, date,cfr) %>% # Select variables to be displayed in output
+    arrange(desc(cfr)) # Arrange output in descending order (highest CFR first)
+}
+
+  # List countries with CFR above x% - change x by changing the number below (here, the percentage is 2%)
+countries_cfr_above_x <- countries_cfr_above_threshold(data, 2)
+
+  # Print result
+countries_cfr_above_x
+```
+
+## Visualising Data
+
+::: justified-text
+To provide a visual explanation of the data, I used ggplot2 derived from the refined datasets in the previous section of the report.
+:::
+
+::: justified-text:::
+For the first visualisation, I did a point plot with a best fit curve for each country income group as it can present the data in a clear, de-cluttered manner. The graph reveals that the CFR was higher in high-income countries between 2020-2021, and then became lower than low-income countries from mid-2021 onwards. This could possibly be attributed to the proliferation of Covid-19 vaccines. Since high-income countries disproportionately had greater access to these vaccines than low-income countries (Duan et al., 2021), it is expected that the CFR in high-income countries decreased over time.
+:::
+
+```{r}
+# Data Visualisation 1 - Case fatality rate over time in low-income countries versus high-income countries
+cfr_over_time <- data %>% # Store the results of the data-wrangling in the original dataframe
+  filter(location %in% c("Low-income countries", "High-income countries"))%>% # Filter out the data points for low-income countries and high-income countries
+  group_by(location, date) # Group these data points by location (low or high-income countries) and date
+  
+cfr_over_time %>%
+  ggplot(aes(x = as.Date(date), y = cfr, color = location)) + # Graph with x-variable being date (time) and y-variable being the case fatality rate. The countries' income group is differentiated by two colours in the graph.
+  geom_point(alpha=0.1) + # Point plot, with transparency being 0.1 so that the line of best fit can be better seen.
+  geom_smooth( aes(color=location), size = 0.7)+ # Curve of best fit, made thinner to see the distinctions between both lines in the graph
+  labs( # Labels for graph
+    title = "Case Fatality Rate (CFR) in Low-Income vs High-Income Countries",
+    x = "Year",
+    y = "Case Fatality Rate (%)",
+    color = "Country Income Group"
+  ) 
+```
+
+::: justified-text:::
+From the case increase rate obtained earlier, I did a visualisation for the case increase rate specific to the UK, as including more countries would have made the graph over-cluttered. I chose a line graph for this plot, as it would have made the fluctuations seen in the graph more obvious. As such, the rate of increase/decrease could be interpreted easily.
+:::
+
+```{r}
+# Data Visualisation 2 - Weekly Case Increase Rate in the UK
+weekly_case_increase_we <- data %>% # Store the results of the data-wrangling in the original dataframe
+  filter(location %in% c("United Kingdom")) %>% # Filter for a specific country, in this example I used the UK
+  group_by(location,date) # Group data by location (the UK) and date, in ascending order
+
+weekly_case_increase_we %>%
+  ggplot(aes(x=as.Date(date), y=weekly_case_increase)) + # Graph with x-variable being date (time), y-variable being weekly case increase. 
+  geom_line()+ # Line graph to illustrate the fluctuations in case increase/decrease over time.
+  labs( # Labels for graph
+    title = "Weekly Case Increase Rate in the United Kingdom",
+    x = "Year",
+    y = "Weekly Case Increase Rate (%)"
+  ) 
+```
+
+::: justified-text:::
+Here, I also chose a line graph to represent the number of cases over time in each continent. Asia and Europe have significantly higher case numbers than the rest of the world. Where research by McKay et al. (2024) has shown that there is evidence to suggest that Africa experienced levels of infection similar to the rest of the world, I believe that the low numbers of African Covid-19 cases reflected may be due to underreporting or inadequate organisational structures to accurately reflect the Covid-19 situation in Africa.
+:::
+
+```{r}
+# Data Visualisation 3 - Number of Cases across various continents
+total_cases_continents <- data %>% # Store the results of the data-wrangling in the original dataframe
+  filter(location %in% continents) %>% # Filter for continents, as used above
+  group_by(location,date) # Group data by the continents, and date (time)
+
+total_cases_continents %>%
+  ggplot(aes(x=as.Date(date), y=total_cases, color=location)) + # Graph with x-variable being date (time), y-variable being the total cases in each continent. The colour of each line will differentiate the continents.
+  geom_line()+ # Line graph so that the trajectory of cases is clear
+  labs( # Labels for graph
+    title = "Number of Covid-19 cases across time in various continents",
+    x = "Year",
+    y = "Number of Covid-19 cases",
+    color = "Continent"
+  ) +
+  scale_y_continuous(labels = scales::comma) # Changes scentific mathematical numbers in the y-axis to readable numeric format
+
+```
+
+::: justified-text
+I wrote a function to display visualisations of weekly case increase rates in each continent from June 2020. This function is necessary if one wishes to compare how Covid-19 cases increased in each continent over time, to find any similarities and/or differences in the trend. The function revealed that while there were minor differences across the continents, the general infection trend was largely similar - testament to how different Covid-19 strains reached the continents one after another, causing a surge in infections.
+
+To write this function, I first filtered a dataframe for the continents (including World statistics). Then, I created the function, which would generate line graphs of the weekly case infection rates for each continent. I then mapped the function to each continent, generating one plot per continent and displayed the graphs in two columns for easier reference.
+:::
+
+```{r}
+# Function - Data visualisations for weekly case increase rate in each continent
+
+filtered_df <- data %>% 
+  filter(location %in% c("Africa", "Asia","Europe","North America",
+                         "Oceania","South America","World")) # Dataframe to filter the continents and World statistics
+start_date <- as.Date("2020-06-01") # Define the start date as 1 June 2020
+
+create_point_plot <- function(location) { # Define function that creates a point plot for each continent's weekly case increase rate
+  filtered_df %>%
+    filter(location == location, date >= start_date)%>% # Filter data for the locations listed above and from the start date listed above
+    ggplot(aes(x = as.Date(date), y = weekly_case_increase)) + # Graph with x-variable as the date (time, from 1 June 2020 onwards), and y-variable as the rate of weekly case increase
+    geom_line() + # Creates a line graph
+    geom_smooth(color = "blue") +  # Add curve of best fit to determine the trend
+    labs(
+        title = glue("Weekly Case Increase Trend in {location}"),
+        x = "Year",
+        y ="Weekly Case Increase (%)"
+    )
+}
+
+plots_list <- map(unique(filtered_df$location), create_point_plot) # Maps the function to each continent, generating separate plots for each continent
+plots_grid <- gridExtra::grid.arrange(grobs = plots_list, ncol = 2) # Displays the graphs in two columns, making them easier to compare
+```
+
+## Critical Engagement with AI
+
+::: justified-text
+I used generative AI chatbots like ChatGPT to assist me in fine-tuning my code. Through this engagement, I noticed how ChatGPT, while being an impressive tool in providing me clarity to any doubts I may have over the mistakes I made, is also a tool that may not accurately complete tasks.
+:::
+
+::: justified-text
+AI was extremely helpful in providing explanations to any error messages that I received while running the code I have written. For example, I was unsure why my code was wrong while writing a function, as I had already defined ‘continent’ in earlier parts of the code. Putting this into ChatGPT and asking why it was wrong gave me clarity on where my code went wrong and how to fix it (see Figure 2 below). Furthermore, AI could interpret the machine-like error messages to me in a human fashion. This powerful tool helped me to better understand how I could edit my code. ChatGPT was extremely helpful in pointing out any oversights I made while coding. Learning from this mistake, I was careful of such mistakes as I continued with the assignment. Hence, AI is a useful tool in illustrating my mistakes and teaching me how to amend my code to make it work.
+:::
+
+![***Figure 2**: Screenshot from ChatGPT illustrating where my code went wrong.*](figure2.png)
+
+::: justified-text
+However, insofar as AI was helpful in pointing out my mistakes, I learnt that it still may give false or misleading suggestions, especially in the context of coding. In the process of fixing mistakes from my code in the case fatality rates function (see above), I asked ChatGPT if `purrr::map` could be used. ChatGPT then generated a code with `purrr::map` in the function (see: Figure 3).
+:::
+
+![***Figure 3**: Screenshot from ChatGPT with code it generated teaching me how to use the `purrr::map` function to write my function.*](figure3.png)
+
+::: justified-text
+Yet, upon closer inspection of the code it had generated, I found no trace of `purrr::map` being used. I further questioned if it was used, to which ChatGPT admitted that the result did not use`purrr::map` as `dplyr` operations were sufficient to code the function I wanted (see: Figure 4).
+:::
+
+![***Figure 4**: Screenshot from ChatGPT, where it admits that `purrr::map` was not used in the code it generated.*](figure4.png)
+
+::: justified-text
+This experience with ChatGPT made me realise how important it is not to wholeheartedly trust the results generated by AI, as AI has the capacity to make mistakes as well. The use of AI, especially in the context of coding, still requires prerequisite knowledge of the language. In this example, if I had no knowledge of `purrr::map` and simply used whatever ChatGPT had generated, I would have made a serious mistake of thinking that `purrr::map` was actually applied to the function. It is imperative, hence, that usage of AI is carried out carefully – that all results generated by AI are checked and verified by the human behind the computer.
+:::
+
+## Conclusion
+
+::: justified-text
+In this essay, I analysed a dataset of Covid-19 cases and deaths across the world, and illustrated these data-wrangling and data visualisation processes. I found that Covid-19, a pervasive disease had indeed affected all places around the globe. Even though the visualisations reveal that Covid-19 affected poorer regions worse than richer regions globally, I believe that the actual extent to which poorer regions were impacted by Covid-19 may not be accurately reflected in this dataset, as official statistics may not be truly reflective of the actual cases and deaths that occur in poorer countries. In my interactions with AI, I learnt how it can be a helpful tool to generate solutions to coding problems, but still must be used with caution and awareness of coding. The solutions generated by AI must be checked by humans before they are adopted, to prevent false or wrong data analyses.
+:::
